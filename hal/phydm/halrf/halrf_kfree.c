@@ -579,12 +579,13 @@ void	*dm_void)
 	
 	if (pg_therm != 0xff) {
 		pg_therm = pg_therm & 0x1f;
-		if ((pg_therm & BIT(0)) == 0)
+		if ((pg_therm & BIT(0)) == 0) {
 			power_trim_info->thermal = (-1 * (pg_therm >> 1));
-		else
+		} else {
 			power_trim_info->thermal = (pg_therm >> 1);
 	
 			power_trim_info->flag |= KFREE_FLAG_THERMAL_K_ON;
+		}
 	}
 	
 	ODM_RT_TRACE(dm, ODM_COMP_MP, ODM_DBG_LOUD, ("[kfree] 8710b thermal trim flag:0x%02x\n", power_trim_info->flag));

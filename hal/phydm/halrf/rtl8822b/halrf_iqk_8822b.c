@@ -1463,7 +1463,7 @@ _iqk_rximr_selfcheck_8822b(
 	for (i = 0 ; i < 2; i++)
 		rx_ini_power_H[i] = (rx_ini_power_H[i] & 0xf8000000)>>27;
 
-	if (rx_ini_power_H[0] != rx_ini_power_H[1])
+	if (rx_ini_power_H[0] != rx_ini_power_H[1]) {
 		switch (rx_ini_power_H[0]) {
 		case 1:
 			rx_ini_power_L[0] = (u32)((rx_ini_power_L[0]>>1) | 0x80000000);
@@ -1496,6 +1496,8 @@ _iqk_rximr_selfcheck_8822b(
 		default:
 			break;
 		}
+	}
+
 		rximr = (u32)(3*((halrf_psd_log2base(rx_ini_power_L[0]/100) - halrf_psd_log2base(rx_ini_power_L[1]/100)))/100);
 /*
 		PHYDM_DBG(dm, ODM_COMP_CALIBRATION, "%-20s: 0x%x, 0x%x, 0x%x, 0x%x,0x%x, tone_index=%x, rximr= %d\n",
@@ -1559,30 +1561,31 @@ _iqk_rximr_test_8822b(
 				temp = odm_read_4byte(dm, 0x1b1c);
 				for (side =0; side < 2; side++) {
 					for (i = 0; i < imr_limit; i++) {
-					if (side ==0)
-						tone_index = 0xff8 -(i<<4);
-					else							
-						tone_index = 0x08 | (i<<4);
-						while (count < 3) {
-							_iqk_rxk1_setting_8822b(dm, path);
-							kfail = _iqk_rximr_rxk1_test_8822b(dm, path, tone_index);
-							PHYDM_DBG(dm, ODM_COMP_CALIBRATION, "[IQK]path = %x, kfail = %x\n", path, kfail);
-							if (kfail) {
-								count++;
-								if (count == 3) {
-									step = 5;
-									temp1b38[side][i] = 0x20000000;
-									PHYDM_DBG(dm, ODM_COMP_CALIBRATION,"[IQK]path = %x, toneindex = %x rxk1 fail\n", path, tone_index);
-								}
-							} else {
-								odm_write_4byte(dm, 0x1b00, 0xf8000008 | path << 1);						
-								odm_write_4byte(dm, 0x1b1c, 0xa2193c32);
-								odm_write_4byte(dm, 0x1b14, 0xe5);
-								odm_write_4byte(dm, 0x1b14, 0x0);
-								temp1b38[side][i] = odm_read_4byte(dm, 0x1b38);
-								PHYDM_DBG(dm, ODM_COMP_CALIBRATION,"[IQK]path = 0x%x, tone_idx = 0x%x, tmp1b38 = 0x%x\n", path, tone_index, temp1b38[side][i]);
-								break;
-							}				
+						if (side ==0) {
+							tone_index = 0xff8 -(i<<4);
+						} else {							
+							tone_index = 0x08 | (i<<4);
+							while (count < 3) {
+								_iqk_rxk1_setting_8822b(dm, path);
+								kfail = _iqk_rximr_rxk1_test_8822b(dm, path, tone_index);
+								PHYDM_DBG(dm, ODM_COMP_CALIBRATION, "[IQK]path = %x, kfail = %x\n", path, kfail);
+								if (kfail) {
+									count++;
+									if (count == 3) {
+										step = 5;
+										temp1b38[side][i] = 0x20000000;
+										PHYDM_DBG(dm, ODM_COMP_CALIBRATION,"[IQK]path = %x, toneindex = %x rxk1 fail\n", path, tone_index);
+									}
+								} else {
+									odm_write_4byte(dm, 0x1b00, 0xf8000008 | path << 1);						
+									odm_write_4byte(dm, 0x1b1c, 0xa2193c32);
+									odm_write_4byte(dm, 0x1b14, 0xe5);
+									odm_write_4byte(dm, 0x1b14, 0x0);
+									temp1b38[side][i] = odm_read_4byte(dm, 0x1b38);
+									PHYDM_DBG(dm, ODM_COMP_CALIBRATION,"[IQK]path = 0x%x, tone_idx = 0x%x, tmp1b38 = 0x%x\n", path, tone_index, temp1b38[side][i]);
+									break;
+								}				
+							}
 						}
 					}
 				}

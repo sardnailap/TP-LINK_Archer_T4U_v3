@@ -138,9 +138,9 @@ void phydm_get_iqk_cfir(
 	u8 i, ch;
 	u32 tmp;
 
-	if (debug)
+	if (debug) {
 		ch = 2;
-	else
+	} else {
 		ch = 0;
 
 		odm_set_bb_reg(dm, 0x1b00, MASKDWORD, 0xf8000008 | path << 1);
@@ -155,6 +155,7 @@ void phydm_get_iqk_cfir(
 			iqk_info->iqk_cfir_real[ch][path][idx][i] = (tmp & 0x0fff0000) >> 16;
 			iqk_info->iqk_cfir_imag[ch][path][idx][i] = tmp & 0xfff;
 		}
+	}
 	odm_set_bb_reg(dm, 0x1bd8, MASKDWORD, 0x0);
 	odm_set_bb_reg(dm, 0x1b0c, BIT(13) | BIT(12), 0x0);
 }
